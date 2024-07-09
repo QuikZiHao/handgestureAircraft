@@ -1,0 +1,7 @@
+pyautogui
+mediapipe
+tdqm
+tensorflow
+tf-nightly
+pygame
+pandas

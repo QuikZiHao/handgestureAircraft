@@ -166,7 +166,6 @@ class AirCraft:
                 result = self.model.get_score(hand_landmarks)
                 if(result):
                     direction = self.cam.decide_move(result)
-                    print(direction)
                     player.move(direction=direction)
                 else:
                     self.cam.decide_move(result)

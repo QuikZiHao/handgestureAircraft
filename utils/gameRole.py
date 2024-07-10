@@ -41,9 +41,18 @@ class Player(pygame.sprite.Sprite):
         self.bullets = pygame.sprite.Group()            # 玩家飞机所发射的子弹的集合
         self.img_index = 0                              # 玩家精灵图片索引
         self.is_hit = False                             # 玩家是否被击中
+        self.move_hash = {
+            "right" : self.moveRight,
+            "left" : self.moveLeft,
+            "front" : self.moveUp,
+            "back" : self.moveDown
+        }
 
-        
-
+    def move(self, direction:str):
+        if direction == "No":
+            return
+        self.move_hash[direction]()
+           
     def shoot(self, bullet_img):
         bullet = Bullet(bullet_img, self.rect.midtop)
         self.bullets.add(bullet)

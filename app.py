@@ -10,7 +10,7 @@ import copy
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--proceed_score",type=int,default=10)
-    parser.add_argument("--width", help='width', type=int, default=480)
+    parser.add_argument("--width", help='width', type=int, default=480*2)
     parser.add_argument("--height", help='height', type=int, default=800)
     parser.add_argument("--min_detection_confidence",
                         help='min_detection_confidence',

@@ -11,11 +11,41 @@ class WebCam:
         self.min_track_conf = min_tracking_confidence
         self.model = Hand
         self.model = self.model.Hands(
-            max_num_hands=1,
+            max_num_hands=2,
             min_detection_confidence=self.min_detect_conf,
             min_tracking_confidence=self.min_track_conf
         )
-        self.previousLandmarks = [[0,0]]
+        self.previous_landmarks = []
+        self.real_landmarks = [[0,0]]
+        self.frame = None
+
+    def decide_move(self, is_pointer:bool):
+        if is_pointer:
+            self.real_landmarks.append(self.previous_landmarks.pop())
+            if len(self.real_landmarks) == 2:
+                ###determine move###
+                x1, y1 = self.real_landmarks[0][0], self.real_landmarks[0][1]
+                x2, y2 = self.real_landmarks[1][0], self.real_landmarks[1][1]
+                horizontal_distance = abs(x2 - x1)
+                vertical_distance = abs(y2 - y1)
+                direction = "No"
+
+                if horizontal_distance > vertical_distance:
+                    if x2 > x1:
+                        direction = 'right'
+                    elif x2 < x1:
+                        direction = 'left'
+                else:
+                    if y2 > y1:
+                        direction = 'back'
+                    elif y2 < y1:
+                        direction = 'front'
+                self.real_landmarks.pop(0)
+                return direction
+        else:
+            self.previous_landmarks.pop()
+        return "No"
+
 
     def calc_landmark_list(self, image:np.ndarray, landmarks:np.ndarray) -> list[list[int]]:
         image_width, image_height = image.shape[1], image.shape[0]
@@ -33,7 +63,6 @@ class WebCam:
             return n / max_value
         
         temp_landmark_list = copy.deepcopy(landmark_list)
-
         # Convert to relative coordinates
         base_x, base_y = 0, 0
         for index, landmark_point in enumerate(temp_landmark_list):
@@ -61,8 +90,12 @@ class WebCam:
         
         if not ret:
             exit()
+        self.frame = frame
+        self.frame = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
         frame = cv2.flip(frame, 1)  # Mirror display
         debug_image = copy.deepcopy(frame)
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+ 
 
         # Apply model
         results = self.model.process(frame)
@@ -70,9 +103,11 @@ class WebCam:
             for hand_landmarks, handedness in zip(results.multi_hand_landmarks,
                                             results.multi_handedness):
                 landmark_list = self.calc_landmark_list(debug_image, hand_landmarks)
-                # self.storePreviousLandmarks(landmark=landmark_list[8])
+                self.previous_landmarks.append(landmark_list[8])
                 pre_processed_landmark_list = self.pre_process_landmark(landmark_list)
-        return {"landmark_list":landmark_list}
+        else:
+            return None
+        return pre_processed_landmark_list
     
     
 

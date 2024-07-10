@@ -3,6 +3,8 @@ from pygame.locals import *
 from utils.gameRole import *
 import random
 from utils.webcam import WebCam
+import cv2
+import torch
 
 
 class AirCraft:
@@ -15,7 +17,7 @@ class AirCraft:
         self.model.eval()
         self.cam = WebCam(min_detection_confidence=min_detection_confidence,
                  min_tracking_confidence=min_tracking_confidence)
-    
+        
     def game(self):
         pygame.init()
         screen = pygame.display.set_mode((self.screen_width, self.screen_height)) 
@@ -78,7 +80,7 @@ class AirCraft:
         while running:
         # Control the maximum frame rate of the game is 60
             clock.tick(60)
-            kwargs = self.cam.run()
+            hand_landmarks = self.cam.run()
             # Control the firing of the bullet frequency and fire the bullet
             if not player.is_hit:
                 if shoot_frequency % 15 == 0:
@@ -158,6 +160,17 @@ class AirCraft:
             text_rect = score_text.get_rect()
             text_rect.topleft = [10, 10]
             screen.blit(score_text, text_rect)
+            image = pygame.surfarray.make_surface( cv2.rotate(self.cam.frame,cv2.ROTATE_90_COUNTERCLOCKWISE))
+            screen.blit(image, (480, 0))
+            if (hand_landmarks) is not None:
+                result = self.model.get_score(hand_landmarks)
+                if(result):
+                    direction = self.cam.decide_move(result)
+                    print(direction)
+                    player.move(direction=direction)
+                else:
+                    self.cam.decide_move(result)
+            
 
             # Update screen
             pygame.display.update()
@@ -167,19 +180,6 @@ class AirCraft:
                     pygame.quit()
                     exit()
 
-            landmarks = kwargs["landmark_list"]
-            self.cam.storePreviousLandmarks(landmarks[8])
-            result = self.model(landmarks)
-            if(result):
-                if self.cam.previousLandmarks[0][0] < self.cam.previousLandmarks[1][0]:
-                    player.moveRight()
-                if self.cam.previousLandmarks[0][0] > self.cam.previousLandmarks[1][0]:
-                    player.moveLeft()
-                if self.cam.previousLandmarks[0][1] > self.cam.previousLandmarks[1][1]:
-                    player.moveUp()
-                if self.cam.previousLandmarks[0][1] < self.cam.previousLandmarks[1][1]:
-                    player.moveDown()
-            self.cam.previousLandmarks.pop(0)
         '''   
             change to model detect
         '''    

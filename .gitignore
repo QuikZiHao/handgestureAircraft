@@ -1,4 +1,5 @@
 aircraft
 __pycache__/
-dataset
+model/dataset/*
 model/save/*
+keypoint.csv

@@ -15,6 +15,7 @@ class WebCam:
             min_detection_confidence=self.min_detect_conf,
             min_tracking_confidence=self.min_track_conf
         )
+        self.previousLandmarks = [[0,0]]
 
     def calc_landmark_list(self, image:np.ndarray, landmarks:np.ndarray) -> list[list[int]]:
         image_width, image_height = image.shape[1], image.shape[0]
@@ -26,7 +27,6 @@ class WebCam:
             # landmark_z = landmark.z
             landmark_point.append([landmark_x, landmark_y])
         return landmark_point
-    
     
     def pre_process_landmark(self,landmark_list) -> np.ndarray:
         def normalize_(n):
@@ -52,6 +52,9 @@ class WebCam:
 
         return temp_landmark_list
     
+    def storePreviousLandmarks(self, landmark): 
+        self.previousLandmarks.append(landmark)
+              
     def run(self) -> list[np.ndarray]:
         # Capture frame-by-frame
         ret, frame = self.cam.read()
@@ -63,15 +66,16 @@ class WebCam:
 
         # Apply model
         results = self.model.process(frame)
-        landmarks_set = []
         if results.multi_hand_landmarks is not None:
             for hand_landmarks, handedness in zip(results.multi_hand_landmarks,
                                             results.multi_handedness):
                 landmark_list = self.calc_landmark_list(debug_image, hand_landmarks)
-
+                # self.storePreviousLandmarks(landmark=landmark_list[8])
                 pre_processed_landmark_list = self.pre_process_landmark(landmark_list)
-                landmarks_set.append(pre_processed_landmark_list)
-        return {"landmark":landmarks_set, "frame":frame}
+        return {"landmark_list":landmark_list}
+    
+    
+
                     
         
   

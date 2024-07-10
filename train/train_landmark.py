@@ -56,7 +56,7 @@ def train():
     set_seed(args.random_seed,device)
     data = LandMarkDataSet(args.dataset_dir)
     data_loader = LandMarkDataLoader(dataset=data, test_train_ratio=args.test_train_ratio, batch_size=args.batch_size, shuffle= args.shuffle)
-    model = LandMarkModel(input_size= 42,output_size = data.get_type_amt())
+    model = LandMarkModel(input_size= 42,output_size = 1)
     model.to(device)
 
     loss_fn = nn.BCELoss()
@@ -71,7 +71,7 @@ def train():
         for batch, (X, y) in enumerate(data_loader.train_loader):
             #frontpropagation
             X = X.type(torch.FloatTensor).to(device)       
-            y = y.type(torch.LongTensor).squeeze().to(device)
+            y = y.type(torch.FloatTensor).squeeze().to(device)
             y_pred = model(X).squeeze()
 
             #calculate loss and costfunction
@@ -97,7 +97,7 @@ def train():
         test_acc = 0
         for batch, (X_test_batch, y_test) in enumerate(data_loader.test_loader):
             X_test_batch = X_test_batch.type(torch.FloatTensor).to(device)
-            y_test = y_test.type(torch.LongTensor).squeeze().to(device)
+            y_test = y_test.type(torch.FloatTensor).squeeze().to(device)
             model.eval()
             with torch.inference_mode():
                 y_test_pred = model(X_test_batch).squeeze()
@@ -105,8 +105,8 @@ def train():
                 acc = accuracy_fn(y_test_pred,y_test)
                 test_loss += loss.item()
                 test_acc += acc
-        test_loss /=len(data_loader.test_loader)
-        test_acc /=len(data_loader.test_loader)
+        test_loss = test_loss/len(data_loader.test_loader)
+        test_acc = test_acc/len(data_loader.test_loader)
         if epoch % 20 == 19:
             print()
             print(f"Epoch = {epoch+1}\n-------------")

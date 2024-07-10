@@ -30,7 +30,7 @@ def get_args():
 
 def main():
     args = get_args()
-    model = LandMarkModel(42, output_size=6)
+    model = LandMarkModel(42, output_size=1)
     model = load_model(model=model, file_path=args.model_path)
     game = AirCraft(screen_width=args.width,screen_height=args.height,model=model)
     game.game()

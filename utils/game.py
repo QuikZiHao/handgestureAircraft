@@ -166,19 +166,20 @@ class AirCraft:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     exit()
- 
-            # Listening for keyboard events
-            key_pressed = pygame.key.get_pressed()
-            # Invalid if the player is hit
-            if not player.is_hit:
-                if key_pressed[K_w] or key_pressed[K_UP]:
-                    player.moveUp()
-                if key_pressed[K_s] or key_pressed[K_DOWN]:
-                    player.moveDown()
-                if key_pressed[K_a] or key_pressed[K_LEFT]:
-                    player.moveLeft()
-                if key_pressed[K_d] or key_pressed[K_RIGHT]:
+
+            landmarks = kwargs["landmark_list"]
+            self.cam.storePreviousLandmarks(landmarks[8])
+            result = self.model(landmarks)
+            if(result):
+                if self.cam.previousLandmarks[0][0] < self.cam.previousLandmarks[1][0]:
                     player.moveRight()
+                if self.cam.previousLandmarks[0][0] > self.cam.previousLandmarks[1][0]:
+                    player.moveLeft()
+                if self.cam.previousLandmarks[0][1] > self.cam.previousLandmarks[1][1]:
+                    player.moveUp()
+                if self.cam.previousLandmarks[0][1] < self.cam.previousLandmarks[1][1]:
+                    player.moveDown()
+            self.cam.previousLandmarks.pop(0)
         '''   
             change to model detect
         '''    

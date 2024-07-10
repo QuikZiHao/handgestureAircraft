@@ -9,7 +9,7 @@ def get_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--dir", type=str, default=r'model\dataset')
-    parser.add_argument("--datafolder", type=str, default=r'model\dataset')
+    parser.add_argument("--datafolder", type=str, default=r'model')
 
     args = parser.parse_args()
 
